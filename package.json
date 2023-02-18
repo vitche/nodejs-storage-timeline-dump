@@ -1,0 +1,18 @@
+{
+  "name": "nodejs-storage-timeline-dump",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vitche/nodejs-storage-timeline-dump.git"
+  },
+  "author": "Vitche Research Team Developer",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vitche/nodejs-storage-timeline-dump/issues"
+  },
+  "homepage": "https://github.com/vitche/nodejs-storage-timeline-dump#readme"
+}
