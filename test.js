@@ -1,7 +1,15 @@
 const dump = require("./main");
 
-let token = new dump.Archiver("/tmp").archive();
-console.log(token);
+const main = async function () {
 
-token = new dump.Archiver("/tmp/.zip.lzma").unarchive();
-console.log(token);
+    const archiver = new dump.Archiver("/tmp/");
+
+    let token = await archiver.archive();
+    console.log(token);
+
+    token = await archiver.unarchive();
+    console.log(token);
+};
+
+main().then(() => {
+});

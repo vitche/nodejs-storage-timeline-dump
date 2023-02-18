@@ -1,14 +1,31 @@
+const fs = require("fs");
+const archiver = require('archiver');
+
 class Archiver {
 
-    constructor(path) {
-
+    constructor(_path) {
+        this.path = _path;
     }
 
-    archive() {
-        return "/tmp/.zip.lzma";
+    async archive() {
+
+        const targetPath = `${this.path}.zip`;
+
+        const output = fs.createWriteStream(targetPath);
+        const archive = archiver('zip', {
+            zlib: {
+                level: 9
+            }
+        });
+
+        archive.pipe(output);
+
+        await archive.finalize();
+
+        return targetPath;
     }
 
-    unarchive() {
+    async unarchive() {
         return "/tmp/";
     }
 }
