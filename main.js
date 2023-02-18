@@ -20,6 +20,8 @@ class Archiver {
 
         archive.pipe(output);
 
+        archive.directory(this.path, "/");
+
         await archive.finalize();
 
         return targetPath;
