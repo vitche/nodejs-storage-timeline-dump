@@ -4,7 +4,7 @@ const main = async function () {
 
     let token;
 
-    const firstStorage = new dump.FileStreamStorage("./storages/storage-1/");
+    const firstStorage = new dump.FileStreamStorage("./storages/storage-1");
     token = await firstStorage.toFile();
     console.log(token);
 

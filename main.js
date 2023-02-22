@@ -50,7 +50,7 @@ class StreamStorage {
 
         // Explicitly add all sub-folders
         for (const directory of schema) {
-            archive.directory(`${this.path}${directory}/`, `/${directory}`);
+            archive.directory(`${this.path}/${directory}/`, `/${directory}`);
         }
 
         await archive.finalize();
@@ -64,7 +64,7 @@ class StreamStorage {
 class FileStreamStorage extends StreamStorage {
 
     targetPath() {
-        return `${this.path}.zip`;
+        return `${this.path}/.zip`;
     }
 
     /**
