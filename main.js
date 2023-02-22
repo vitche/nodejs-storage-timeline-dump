@@ -1,5 +1,4 @@
 const fs = require("fs");
-const lzma = require('lzma-native');
 const archiver = require('archiver');
 const unzip = require('unzip-stream');
 
@@ -45,10 +44,8 @@ class Archiver {
                 level: 9
             }
         });
-        const lzmaCompressor = lzma.createCompressor();
         const output = fs.createWriteStream(this.targetPath());
         archive
-            // .pipe(lzmaCompressor)
             .pipe(output);
 
         // List schema (directories within the storage)
@@ -73,11 +70,8 @@ class Archiver {
             sourceFilePath = this.targetPath();
         }
 
-        const lzmaDecompressor = lzma.createDecompressor();
-
         const readStream = fs.createReadStream(sourceFilePath);
         readStream
-            // .pipe(lzmaDecompressor)
             .pipe(unzip.Extract({
                 path: this.path
             }));
