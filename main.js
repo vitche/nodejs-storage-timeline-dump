@@ -1,4 +1,5 @@
 const fs = require("fs");
+const lzma = require('lzma-native');
 const archiver = require('archiver');
 
 const {readdir} = fs.promises;
@@ -34,15 +35,16 @@ class Archiver {
      */
     async archive() {
 
-        const targetPath = `${this.path}.zip`;
+        const targetPath = `${this.path}.zip.lzma`;
 
-        const output = fs.createWriteStream(targetPath);
         const archive = archiver('zip', {
             zlib: {
                 level: 9
             }
         });
-        archive.pipe(output);
+        const lzmaCompressor = lzma.createCompressor();
+        const output = fs.createWriteStream(targetPath);
+        archive.pipe(lzmaCompressor).pipe(output);
 
         // List schema (directories within the storage)
         const schema = await getDirectories(this.path);
