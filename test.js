@@ -2,13 +2,16 @@ const dump = require("./main");
 
 const main = async function () {
 
-    const archiver = new dump.Archiver("./storage/");
+    let token;
 
-    let token = await archiver.archive();
+    const archiver = new dump.Archiver("./storage/");
+    const extractor = new dump.Archiver("/var/tmp/")
+
+    token = await archiver.archive();
     console.log(token);
 
-    // token = await archiver.extract("./storage/.zip");
-    // console.log(token);
+    token = await extractor.extract("./storage/.zip.lzma");
+    console.log(token);
 };
 
 main().then(() => {

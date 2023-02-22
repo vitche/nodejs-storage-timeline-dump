@@ -1,6 +1,7 @@
 const fs = require("fs");
 const lzma = require('lzma-native');
 const archiver = require('archiver');
+const unzip = require('unzip-stream');
 
 const {readdir} = fs.promises;
 
@@ -28,6 +29,10 @@ class Archiver {
         this.path = _path;
     }
 
+    targetPath() {
+        return `${this.path}.zip.lzma`;
+    }
+
     /**
      * Creates an archived storage folder dump.
      * ZLIB compression level is 9.
@@ -35,16 +40,16 @@ class Archiver {
      */
     async archive() {
 
-        const targetPath = `${this.path}.zip.lzma`;
-
         const archive = archiver('zip', {
             zlib: {
                 level: 9
             }
         });
         const lzmaCompressor = lzma.createCompressor();
-        const output = fs.createWriteStream(targetPath);
-        archive.pipe(lzmaCompressor).pipe(output);
+        const output = fs.createWriteStream(this.targetPath());
+        archive
+            // .pipe(lzmaCompressor)
+            .pipe(output);
 
         // List schema (directories within the storage)
         const schema = await getDirectories(this.path);
@@ -55,11 +60,29 @@ class Archiver {
         }
 
         await archive.finalize();
-        return targetPath;
+
+        return this.targetPath();
     }
 
     async extract(_archivePath = undefined) {
-        throw new Error("Not implemented");
+
+        let sourceFilePath;
+        if (_archivePath) {
+            sourceFilePath = _archivePath;
+        } else {
+            sourceFilePath = this.targetPath();
+        }
+
+        const lzmaDecompressor = lzma.createDecompressor();
+
+        const readStream = fs.createReadStream(sourceFilePath);
+        readStream
+            // .pipe(lzmaDecompressor)
+            .pipe(unzip.Extract({
+                path: this.path
+            }));
+
+        return this.path;
     }
 }
 
