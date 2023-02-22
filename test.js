@@ -4,13 +4,12 @@ const main = async function () {
 
     let token;
 
-    const archiver = new dump.FileStreamStorage("./storages/storage-1/");
-    const extractor = new dump.FileStreamStorage("/var/tmp/")
-
-    token = await archiver.toFile();
+    const firstStorage = new dump.FileStreamStorage("./storages/storage-1/");
+    token = await firstStorage.toFile();
     console.log(token);
 
-    token = await extractor.fromFile("./storages/storage-1/.zip");
+    const secondStorage = new dump.FileStreamStorage("./storages/storage-3")
+    token = await secondStorage.fromFile("./storages/storage-1/.zip");
     console.log(token);
 };
 
