@@ -11,6 +11,8 @@ const main = async function () {
     const secondStorage = new dump.FileStreamStorage("./storages/storage-3")
     token = await secondStorage.fromFile("./storages/storage-1/.zip");
     console.log(token);
+
+    await firstStorage.removeFile();
 };
 
 main().then(() => {

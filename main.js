@@ -11,6 +11,14 @@ const {readdir} = fs.promises;
 class StreamStorage {
 
     /**
+     * Creates a new instance of the storage object.
+     * @param _path Database storage folder path.
+     */
+    constructor(_path) {
+        this.path = _path;
+    }
+
+    /**
      * Writes an archived storage folder dump to a target stream specified.
      * ZLIB compression level is 9.
      * @param output A stream to receive the dump.
@@ -55,15 +63,6 @@ class StreamStorage {
  */
 class FileStreamStorage extends StreamStorage {
 
-    /**
-     * Creates a new instance of the archiver object.
-     * @param _path Database storage folder path.
-     */
-    constructor(_path) {
-        super();
-        this.path = _path;
-    }
-
     targetPath() {
         return `${this.path}.zip`;
     }
@@ -95,6 +94,11 @@ class FileStreamStorage extends StreamStorage {
             }));
 
         return this.path;
+    }
+
+    async removeFile() {
+        await fs.rm(this.targetPath(), () => {
+        });
     }
 }
 
