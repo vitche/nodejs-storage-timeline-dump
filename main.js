@@ -5,46 +5,35 @@ const unzip = require('unzip-stream');
 const {readdir} = fs.promises;
 
 /**
- * Builds a list of all sub-folders within a given folder.
- * @param source The given folder.
- * @returns {Promise<string[]>} The list of sub-folders.
+ * A class responsible for writing and applying storage folder
+ * archived streams.
  */
-const getDirectories = async source =>
-    (await readdir(source, {withFileTypes: true}))
-        .filter(dirent => dirent.isDirectory())
-        .map(dirent => dirent.name)
-
-/**
- * A class responsible for making and applying
- * storage folder archived dumps.
- */
-class Archiver {
+class StreamStorage {
 
     /**
-     * Creates a new instance of the archiver object.
-     * @param _path Database storage folder path.
-     */
-    constructor(_path) {
-        this.path = _path;
-    }
-
-    targetPath() {
-        return `${this.path}.zip.lzma`;
-    }
-
-    /**
-     * Creates an archived storage folder dump.
+     * Writes an archived storage folder dump to a target stream specified.
      * ZLIB compression level is 9.
-     * @returns {Promise<string>} Resulting dump path within the local file system.
+     * @param output A stream to receive the dump.
+     * @returns {Promise<void>}
      */
-    async archive() {
+    async toStream(output) {
+
+        /**
+         * Builds a list of all sub-folders within a given folder.
+         * @param source The given folder.
+         * @returns {Promise<string[]>} The list of sub-folders.
+         */
+        const getDirectories = async source =>
+            (await readdir(source, {withFileTypes: true}))
+                .filter(dirent => dirent.isDirectory())
+                .map(dirent => dirent.name)
 
         const archive = archiver('zip', {
             zlib: {
                 level: 9
             }
         });
-        const output = fs.createWriteStream(this.targetPath());
+
         archive
             .pipe(output);
 
@@ -57,11 +46,40 @@ class Archiver {
         }
 
         await archive.finalize();
+    }
+}
 
-        return this.targetPath();
+/**
+ * A class responsible for making and applying
+ * storage folder archived file dumps.
+ */
+class FileStreamStorage extends StreamStorage {
+
+    /**
+     * Creates a new instance of the archiver object.
+     * @param _path Database storage folder path.
+     */
+    constructor(_path) {
+        super();
+        this.path = _path;
     }
 
-    async extract(_archivePath = undefined) {
+    targetPath() {
+        return `${this.path}.zip`;
+    }
+
+    /**
+     * Creates an archived storage folder dump as a file.
+     * @returns {Promise<string>} Resulting dump path within the local file system.
+     */
+    async toFile() {
+        const path = this.targetPath();
+        const output = fs.createWriteStream(path);
+        await super.toStream(output);
+        return path;
+    }
+
+    async fromFile(_archivePath = undefined) {
 
         let sourceFilePath;
         if (_archivePath) {
@@ -81,5 +99,6 @@ class Archiver {
 }
 
 module.exports = {
-    Archiver
+    StreamStorage,
+    FileStreamStorage
 }
