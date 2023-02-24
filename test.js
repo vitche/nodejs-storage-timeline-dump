@@ -12,6 +12,10 @@ const main = async function () {
     token = await secondStorage.fromFile("./storages/storage-1/.zip");
     console.log(token);
 
+    const thirdStorage = new dump.HTTPStreamStorage("./storages/storage-3");
+    token = await thirdStorage.fromURI("https://europe-west1-hype-dev.cloudfunctions.net/storage-timeline");
+    console.log(token);
+
     await firstStorage.removeFile();
 };
 

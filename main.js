@@ -1,4 +1,5 @@
 const fs = require("fs");
+const {fetch} = require('./fetch');
 const archiver = require('archiver');
 const unzip = require('unzip-stream');
 
@@ -102,7 +103,23 @@ class FileStreamStorage extends StreamStorage {
     }
 }
 
+class HTTPStreamStorage extends StreamStorage {
+
+    async fromURI(_uri) {
+        const response = await fetch(_uri, {
+            headers: {
+                "Content-Type": "application/zip"
+            }
+        });
+        response.body.pipe(unzip.Extract({
+            path: this.path
+        }));
+        return this.path;
+    }
+}
+
 module.exports = {
     StreamStorage,
-    FileStreamStorage
+    FileStreamStorage,
+    HTTPStreamStorage
 }
