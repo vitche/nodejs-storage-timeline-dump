@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 const {fetch} = require('./fetch');
 const archiver = require('archiver');
 const unzip = require('unzip-stream');
@@ -105,16 +106,56 @@ class FileStreamStorage extends StreamStorage {
 
 class HTTPStreamStorage extends StreamStorage {
 
+    /**
+     * Restores a dump from the storage HTTP ZIP stream identified by the URI.
+     * @param _uri The storage ZIP stream URI.
+     * @returns {Promise<{deployTemporary: Promise<*>, deploy: Promise<*>}>} The immediate or temporary deployer.
+     */
     async fromURI(_uri) {
-        const response = await fetch(_uri, {
-            headers: {
-                "Content-Type": "application/zip"
-            }
-        });
-        response.body.pipe(unzip.Extract({
-            path: this.path
-        }));
-        return this.path;
+
+        const buildDeployer = (suffix) => {
+
+            return async () => {
+
+                const response = await fetch(_uri, {
+                    headers: {
+                        "Content-Type": "application/zip"
+                    }
+                });
+
+                // v.1.0
+                // response.body.pipe(unzip.Extract({
+                //     path: this.path
+                // }));
+
+                // v.2.0
+                const self = this;
+                response.body.pipe(unzip.Parse())
+                    .on('entry', function (entry) {
+
+                        const fileName = entry.path;
+                        const newFileName = `${fileName}${suffix}`;
+                        const fullPath = self.path + '/' + newFileName;
+                        const parentDirectory = path.dirname(fullPath);
+
+                        fs.access(parentDirectory, fs.constants.F_OK, function (error) {
+                            if (error) {
+                                // Create the directory if not exists
+                                fs.mkdirSync(parentDirectory, {recursive: true});
+                            }
+                            // Save file content
+                            entry.pipe(fs.createWriteStream(fullPath));
+                        });
+                    });
+
+                return this.path;
+            };
+        };
+
+        return {
+            deploy: buildDeployer(""),
+            deployTemporary: buildDeployer(".tmp")
+        }
     }
 }
 

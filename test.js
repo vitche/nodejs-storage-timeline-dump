@@ -13,7 +13,9 @@ const main = async function () {
     console.log(token);
 
     const thirdStorage = new dump.HTTPStreamStorage("./storages/storage-3");
-    token = await thirdStorage.fromURI("https://europe-west1-hype-dev.cloudfunctions.net/storage-timeline");
+    token = await (await thirdStorage.fromURI("https://europe-west1-hype-dev.cloudfunctions.net/storage-timeline")).deploy();
+    console.log(token);
+    token = await (await thirdStorage.fromURI("https://europe-west1-hype-dev.cloudfunctions.net/storage-timeline")).deployTemporary();
     console.log(token);
 
     await firstStorage.removeFile();
