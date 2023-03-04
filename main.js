@@ -109,7 +109,7 @@ class HTTPStreamStorage extends StreamStorage {
     /**
      * Restores a dump from the storage HTTP ZIP stream identified by the URI.
      * @param _uri The storage ZIP stream URI.
-     * @returns {Promise<{deployTemporary: Promise<*>, deploy: Promise<*>}>} The immediate or temporary deployer.
+     * @returns {Promise<{deployTemporary: (function(): Promise<*>), deploy: (function(): Promise<*>)}>}The immediate or temporary deployer.
      */
     async fromURI(_uri) {
 
@@ -155,7 +155,7 @@ class HTTPStreamStorage extends StreamStorage {
         return {
             deploy: buildDeployer(""),
             deployTemporary: buildDeployer(".tmp")
-        }
+        };
     }
 }
 
