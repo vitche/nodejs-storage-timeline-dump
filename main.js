@@ -130,23 +130,27 @@ class HTTPStreamStorage extends StreamStorage {
 
                 // v.2.0
                 const self = this;
-                response.body.pipe(unzip.Parse())
-                    .on('entry', function (entry) {
+                await new Promise((resolve, reject) => {
+                    response.body.pipe(unzip.Parse())
+                        .on('entry', function (entry) {
 
-                        const fileName = entry.path;
-                        const newFileName = `${fileName}${suffix}`;
-                        const fullPath = self.path + '/' + newFileName;
-                        const parentDirectory = path.dirname(fullPath);
+                            const fileName = entry.path;
+                            const newFileName = `${fileName}${suffix}`;
+                            const fullPath = self.path + '/' + newFileName;
+                            const parentDirectory = path.dirname(fullPath);
 
-                        fs.access(parentDirectory, fs.constants.F_OK, function (error) {
-                            if (error) {
-                                // Create the directory if not exists
-                                fs.mkdirSync(parentDirectory, {recursive: true});
-                            }
-                            // Save file content
-                            entry.pipe(fs.createWriteStream(fullPath));
-                        });
-                    });
+                            fs.access(parentDirectory, fs.constants.F_OK, function (error) {
+                                if (error) {
+                                    // Create the directory if not exists
+                                    fs.mkdirSync(parentDirectory, {recursive: true});
+                                }
+                                // Save file content
+                                entry.pipe(fs.createWriteStream(fullPath));
+                            });
+                        })
+                        .on('finish', resolve)
+                        .on('error', reject);
+                });
 
                 return this.path;
             };
