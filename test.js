@@ -19,6 +19,10 @@ const main = async function () {
     console.log(token);
 
     await firstStorage.removeFile();
+
+    const fourthStorage = new dump.HTTPStreamStorage("./storages/storage-4");
+    token = await (await fourthStorage.fromURI("https://34.133.171.197:82/storage/list")).deploy();
+    console.log(token);
 };
 
 main().then(() => {

@@ -1,10 +1,16 @@
 const fs = require("fs");
+const https = require('https');
 const path = require("path");
 const {fetch} = require('./fetch');
 const archiver = require('archiver');
 const unzip = require('unzip-stream');
 
 const {readdir} = fs.promises;
+
+// Define a custom https.Agent that ignores SSL errors
+const agent = new https.Agent({
+    rejectUnauthorized: false
+});
 
 /**
  * A class responsible for writing and applying storage folder
@@ -120,7 +126,8 @@ class HTTPStreamStorage extends StreamStorage {
                 const response = await fetch(_uri, {
                     headers: {
                         "Content-Type": "application/zip"
-                    }
+                    },
+                    agent
                 });
 
                 // v.1.0
