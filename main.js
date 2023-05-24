@@ -173,6 +173,11 @@ class HTTPStreamStorage extends StreamStorage {
                     response.body.pipe(unzip.Parse())
                         .on('entry', function (entry) {
 
+                            // Skip separate entries for directories as they can be inferred from files
+                            if (entry.isDirectory) {
+                                return;
+                            }
+
                             const fileName = entry.path;
                             const newFileName = `${fileName}${suffix}`;
                             const fullPath = self.path + '/' + newFileName;
