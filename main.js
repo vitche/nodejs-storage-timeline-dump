@@ -52,7 +52,7 @@ class StreamStorage {
             const temporaryFilePath = `${os.tmpdir()}/${Math.random().toString(36).substr(2, 9)}.zip`;
 
             // Compress the given storage
-            const {stdout, stderr} = await execPromise(`zip -r ${temporaryFilePath} .`, {
+            const {stdout, stderr} = await execPromise(`zip -9 -r ${temporaryFilePath} .`, {
                 cwd: this.path
             });
 
