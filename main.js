@@ -1,9 +1,19 @@
-const fs = require("fs");
+const fs = require('fs');
+const os = require('os');
+const util = require('util');
+const path = require('path');
 const https = require('https');
-const path = require("path");
+const stream = require('stream');
+const {exec} = require('child_process');
 const {fetch} = require('./fetch');
 const archiver = require('archiver');
 const unzip = require('unzip-stream');
+
+// A pipe, which can be awaited
+const pipeline = util.promisify(stream.pipeline);
+
+// A promisified version of "child_process.exec"
+const execPromise = util.promisify(exec);
 
 const {readdir} = fs.promises;
 
@@ -33,6 +43,28 @@ class StreamStorage {
      * @returns {Promise<void>}
      */
     async toStream(output) {
+
+        // Check, whether the "ZIP" tool is installed in the OS
+        const {stdout: zipStdout} = await execPromise("which zip");
+        if (zipStdout) {
+
+            // A path for a dump
+            const temporaryFilePath = `${os.tmpdir()}/${Math.random().toString(36).substr(2, 9)}.zip`;
+
+            // Compress the given storage
+            const {stdout, stderr} = await execPromise(`zip -r ${temporaryFilePath} .`, {
+                cwd: this.path
+            });
+
+            // Pipe to the output
+            const readStream = fs.createReadStream(temporaryFilePath);
+            await pipeline(readStream, output);
+
+            // Delete the temporary file
+            fs.unlinkSync(temporaryFilePath);
+
+            return;
+        }
 
         /**
          * Builds a list of all sub-folders within a given folder.
