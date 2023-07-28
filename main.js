@@ -45,25 +45,30 @@ class StreamStorage {
     async toStream(output) {
 
         // Check, whether the "ZIP" tool is installed in the OS
-        const {stdout: zipStdout} = await execPromise("which zip");
-        if (zipStdout) {
+        try {
 
-            // A path for a dump
-            const temporaryFilePath = `${os.tmpdir()}/${Math.random().toString(36).substr(2, 9)}.zip`;
+            const {stdout: zipStdout} = await execPromise("which zip");
+            if (zipStdout) {
 
-            // Compress the given storage
-            const {stdout, stderr} = await execPromise(`zip -9 -r ${temporaryFilePath} .`, {
-                cwd: this.path
-            });
+                // A path for a dump
+                const temporaryFilePath = `${os.tmpdir()}/${Math.random().toString(36).substr(2, 9)}.zip`;
 
-            // Pipe to the output
-            const readStream = fs.createReadStream(temporaryFilePath);
-            await pipeline(readStream, output);
+                // Compress the given storage
+                const {stdout, stderr} = await execPromise(`zip -9 -r ${temporaryFilePath} .`, {
+                    cwd: this.path
+                });
 
-            // Delete the temporary file
-            fs.unlinkSync(temporaryFilePath);
+                // Pipe to the output
+                const readStream = fs.createReadStream(temporaryFilePath);
+                await pipeline(readStream, output);
 
-            return;
+                // Delete the temporary file
+                fs.unlinkSync(temporaryFilePath);
+
+                return;
+            }
+        } catch (error) {
+            // Here we just block the crash, because it is crashing each time, when the "zip" tool was not found
         }
 
         /**
