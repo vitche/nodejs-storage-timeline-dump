@@ -100,6 +100,30 @@ class StreamStorage {
 
         await archive.finalize();
     }
+
+    /**
+     * Recursively empties this storage.
+     */
+    async empty(deleteFolders = false) {
+
+        const deleteFolderRecursive = function (path) {
+            if (fs.existsSync(path)) {
+                fs.readdirSync(path).forEach(function (file, index) {
+                    const currentPath = path + "/" + file;
+                    if (fs.lstatSync(currentPath).isDirectory()) { // recurse
+                        deleteFolderRecursive(currentPath);
+                    } else { // delete file
+                        fs.unlinkSync(currentPath);
+                    }
+                });
+                if (deleteFolders) {
+                    fs.rmdirSync(path);
+                }
+            }
+        };
+
+        deleteFolderRecursive(this.path);
+    }
 }
 
 /**
